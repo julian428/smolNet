@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I../include -Ilib -Wall -Wextra -lm -g
+CFLAGS = -I../include -Ilib -Wall -Wextra -lm -g -fsanitize=address
 LDFLAGS = -L../build -lsmolnet
 
 EXAMPLES = tictactoe

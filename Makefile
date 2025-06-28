@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Iinclude -O2
+CFLAGS = -Wall -Wextra -Iinclude
+DFLAGS = -g -O0 -fsanitize=address -U_FORTIFY_SOURCE
 AR = ar
 ARFLAGS = rcs
 
@@ -13,10 +14,21 @@ STATIC_LIB = $(BUILD_DIR)/lib$(LIB_NAME).a
 SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
 OBJ_FILES = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_FILES))
 
+BUILD_TYPE ?= release
+
+ifeq ($(BUILD_TYPE), debug)
+	CFLAGS += $(DFLAGS)
+else
+	CFLAGS += -O2
+endif
 
 .PHONY: all clean test
 
 all: $(STATIC_LIB)
+
+debug:
+	$(MAKE) clean BUILD_TYPE=debug
+	$(MAKE) all BUILD_TYPE=debug
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
