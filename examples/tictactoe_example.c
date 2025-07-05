@@ -1,50 +1,97 @@
 #include <smolnet.h>
+#include <assert.h>
+#include <float.h>
+#include "lib/tictactoe.h"
+
+#define EPOCHS 10
+
+static int last_X = -1;
+static int last_O = -1;
+
+int best_move(double position[9], double probabilities[9]){
+	int move = 0;
+	double probability = 0.0;
+	for(int i = 0; i < 9; i++){
+		if(position[i] != 0) continue;
+		if(probability > probabilities[i]) continue;
+		probability = probabilities[i];
+		move = i;
+	}
+	return move;
+}
+
+int net_move(double position[9], void* state){
+	Network* n = (Network*)state;
+	assert(n != NULL);
+
+	Tensor* input = tensor_data(position, (int[]){1, 9}, 2);
+	network_forward(n, input);
+
+	int move = best_move(position, n->output->data);
+	if(last_X == -1 || position[last_X] == 1) last_X = move;
+	else last_O = move;
+
+	//free_tensor(input);
+	return move;
+}
 
 int main(){
-	Tensor* input = tensor_random((int[]){1}, 1);
-	Tensor* w0 = tensor_random((int[]){1, 2}, 2);
-	Tensor* b0 = tensor_random((int[]){1, 2}, 2);
-	Tensor* z0 = mul_tensors(input, w0);
-	Tensor* zb0 = add_tensors(z0, b0);
-	Tensor* w1 = tensor_random((int[]){1, 2}, 2);
-	Tensor* b1 = tensor_random((int[]){1, 2}, 2);
-	Tensor* z1 = dot_tensors(zb0, w1);
-	Tensor* zb1 = add_tensors(z1, b1);
+	Optimizer* sgd = optimizer_sgd(0.1);
+	Network* bot1 = network(
+		6,
+		dense_layer(9, 18),
+		relu_layer(18),
+		dense_layer(18, 18),
+		relu_layer(18),
+		dense_layer(18, 9),
+		softmax_layer(9)
+	);
 
-	print_tensor(input);
-	printf("\n");
+	Network* bot2 = network(
+		6,
+		dense_layer(9, 18),
+		relu_layer(18),
+		dense_layer(18, 18),
+		relu_layer(18),
+		dense_layer(18, 9),
+		softmax_layer(9)
+	);
 
-	print_tensor(w0);
-	printf("\n");
+	for(int i = 0; i < EPOCHS; i++){
+		double board[9] = {0};
+		GameResult result = game(board, net_move, bot1, net_move, bot2);
+		double expected1[9] = {0};
+		double expected2[9] = {0};
 
-	print_tensor(b0);
-	printf("\n");
-	
-	print_tensor(z0);
-	printf("\n");
+		if(result == WIN){
+			expected1[last_X] = 1;
+			expected2[last_X] = 1;
+		}
+		else if(result == LOSS){
+			expected2[last_O] = 1;
+			expected1[last_O] = 1;
+		}
 
-	print_tensor(zb0);
-	printf("\n");
+		Tensor* exX = tensor_data(expected1, (int[]){1, 9}, 2);
+		Tensor* exO = tensor_data(expected2, (int[]){1, 9}, 2);
 
-	print_tensor(w1);
-	printf("\n");
+		network_calculate_loss(bot1, cel_tensors, exX);
+		network_calculate_loss(bot2, cel_tensors, exO);
+		printf("loss X:%7.4lf\tloss O:%7.4lf\n", bot1->loss->data[0], bot2->loss->data[0]);
+		network_zero_gradients(bot1);
+		network_zero_gradients(bot2);
+		network_backward(bot1);
+		network_backward(bot2);
+		sgd->step(sgd, bot1);
+		sgd->step(sgd, bot2);
 
-	print_tensor(b1);
-	printf("\n");
-	
-	print_tensor(z1);
-	printf("\n");
+		free_tensor(exX);
+		free_tensor(exO);
 
-	print_tensor(zb1);
-	printf("\n");
+		printf("%s\n", resultMessage(result));
+	}
 
-	free_tensor(zb1);
-	free_tensor(z1);
-	free_tensor(b1);
-	free_tensor(w1);
-	free_tensor(zb0);
-	free_tensor(z0);
-	free_tensor(b0);
-	free_tensor(w0);
-	free_tensor(input);
+	sgd->free(sgd);
+	network_free(bot1);
+	network_free(bot2);
 }

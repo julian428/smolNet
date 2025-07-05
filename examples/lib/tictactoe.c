@@ -50,17 +50,17 @@ int validMove(double position[9], int move){
 	return position[move] == 0;
 }
 
-GameResult game(double position[9], int (*p1)(double[9]), int (*p2)(double*)){
+GameResult game(double position[9], MoveFunction* p1, void* p1_state, MoveFunction* p2, void* p2_state){
 	int winning = 0;
 
 	for(int i = 0; (winning = isPositionWinning(position)) == 0 && i < 5; i++){
-		int move1 = p1(position);
+		int move1 = p1(position, p1_state);
 		if(!validMove(position, move1)) return LOSS_ILLEGAL;
 		position[move1] = 1;
 
 		if((winning = isPositionWinning(position)) != 0 || i == 4) break;
 
-		int move2 = p2(position);
+		int move2 = p2(position, p2_state);
 		if(!validMove(position, move2)) return WIN_ILLEGAL;
 		position[move2] = -1;
 	}
@@ -93,7 +93,8 @@ void printBoard(double position[9]){
 	printf("\n");
 }
 
-int player(double position[9]){
+int player(double position[9], void* state){
+	(void)state;
 	printBoard(position);
 
 	int move;

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Iinclude
+CFLAGS = -Wall -Wextra -Werror -Iinclude -lm
 DFLAGS = -g -O0 -fsanitize=address -U_FORTIFY_SOURCE
 AR = ar
 ARFLAGS = rcs
@@ -40,7 +40,7 @@ $(STATIC_LIB): $(OBJ_FILES)
 	$(AR) $(ARFLAGS) $@ $^
 
 test: all
-	$(CC) $(CFLAGS) test/test.c $(STATIC_LIB) -o $(BUILD_DIR)/test
+	$(CC) $(CFLAGS) $(DFLAGS) tests/test.c $(STATIC_LIB) -o $(BUILD_DIR)/test
 	./$(BUILD_DIR)/test
 
 clean:

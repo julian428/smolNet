@@ -6,19 +6,11 @@ void free_tensorgraph(TensorGraph* graph){
 	free(graph);
 }
 
-void free_tensors(TensorGraph* graph){
-	if(!graph || !graph->items) return;
-
-	for(int i = 0; i < graph->size; i++){
-		if(graph->items[i]) free_tensor(graph->items[i]);
-	}
-
-	free_tensorgraph(graph);
-}
-
 void search_tensors(TensorGraph* graph, Tensor* tensor){
-	if(!tensor || tensor->visited) return;
+	if(!graph || !tensor || tensor->visited == -1) return;
 	tensor->visited = 1;
+	static int depth = 0;
+	depth += 1;
 
 	if(tensor->creator){
 		search_tensors(graph, tensor->creator->input1);
@@ -30,7 +22,7 @@ void search_tensors(TensorGraph* graph, Tensor* tensor){
 
 int resize_tensorgraph(TensorGraph* graph){
 	if(!graph || !graph->items) return 0;
-	if(graph->capacity == 0) graph->capacity = 8;
+	if(graph->capacity == 0) graph->capacity = INITIAL_CAPACITY;
 	int new_capacity = 2 * graph->capacity;
 
 	Tensor** new_items = (Tensor**)realloc(graph->items, new_capacity * sizeof(Tensor*));
@@ -70,7 +62,7 @@ TensorGraph* create_tensorgraph(Tensor* root){
 	TensorGraph* graph = (TensorGraph*)malloc(sizeof(TensorGraph));
 	if(!graph) return NULL;
 	
-	int initial_capacity = 8;
+	int initial_capacity = INITIAL_CAPACITY;
 	graph->items = (Tensor**)malloc(initial_capacity * sizeof(Tensor*));
 	if(!graph->items){
 		free(graph);
@@ -83,4 +75,20 @@ TensorGraph* create_tensorgraph(Tensor* root){
 	(void)unvisit_tensors(graph);
 
 	return graph;
+}
+
+void calculate_gradients(TensorGraph* graph){
+	if(!graph || !graph->items) return;
+	for(int i = graph->size-1; i > -1; i--){
+		Tensor* t = graph->items[i];
+		if(t && t->creator) t->creator->back(t);
+	}
+}
+
+void zero_gradients(TensorGraph* graph){
+	if(!graph || !graph->items) return;
+	for(int i = 0; i < graph->size-1; i++){
+		Tensor* t = graph->items[i];
+		if(t && t->creator) zero_gradient(t);
+	}
 }
