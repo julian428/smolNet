@@ -32,7 +32,10 @@ Tensor_sn* borrowTensor(int dims, ...){
 
 	va_list args;
 	va_start(args, dims);
-	if(*item == NULL) *item = (void*)createShapedTensor(dims, args);
+	if(*item == NULL){
+		*item = (void*)createShapedTensor(dims, args);
+		pool->item_pool[pool->allocated_size++] = *item;
+	}
 	va_end(args);
 	return (Tensor_sn*)(*item);
 }

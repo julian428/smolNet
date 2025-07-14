@@ -39,6 +39,7 @@ typedef struct MemoryPool {
 	ItemType type;
 	int pool_size;
 	int free_size;
+	int allocated_size;
 } MemoryPool_sn;
 
 MemoryPool_sn* createPool(int size, ItemType type);

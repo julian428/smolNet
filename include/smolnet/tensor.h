@@ -31,7 +31,7 @@ typedef struct Tensor {
 } Tensor_sn;
 
 Tensor_sn* createTensor();
-Tensor_sn* createShapedTensor(int dims, ...);
+Tensor_sn* createShapedTensor(int dims, va_list args);
 tensorReleaseFunction freeTensor;
 tensorReleaseFunction eraseTensor;
 

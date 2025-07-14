@@ -28,6 +28,10 @@ int* borrowInt(int size){
 	(void)size;
 	if(item == NULL) return NULL;
 
-	if(*item == NULL) *item = (void*)calloc(pool->pool_size, sizeof(int)); // lets leave it like this for now.
+	if(*item == NULL){
+		*item = (void*)calloc(pool->pool_size, sizeof(int)); // lets leave it like this for now.
+		pool->item_pool[pool->allocated_size++] = *item;
+	}
+
 	return (int*)(*item);
 }

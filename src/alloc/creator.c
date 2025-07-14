@@ -32,6 +32,9 @@ Creator_sn* borrowCreator(){
 	void** item = borrowItem(pool);
 	if(!item) return NULL;
 
-	if(*item == NULL) *item = (void*)createCreator();
+	if(*item == NULL){
+		*item = (void*)createCreator();
+		pool->item_pool[pool->allocated_size++] = *item;
+	}
 	return (Creator_sn*)(*item);
 }

@@ -24,7 +24,7 @@ Tensor_sn* createTensor(){
 	return tensor;
 }
 
-Tensor_sn* createShapedTensor(int dims, ...){
+Tensor_sn* createShapedTensor(int dims, va_list args){
 	if(dims < 1){
 		assert(0);
 		return NULL;
@@ -36,6 +36,7 @@ Tensor_sn* createShapedTensor(int dims, ...){
 	int* shape = borrowInt(dims);
 	if(!shape){
 		releaseTensor(tensor);
+		tensor->erase(tensor);
 		return NULL;
 	}
 
@@ -43,18 +44,31 @@ Tensor_sn* createShapedTensor(int dims, ...){
 	tensor->batch_size = 1;
 	tensor->volume = 1;
 	
-	va_list args;
-	va_start(args, dims);
 	for(int i = 0; i < dims; i++){
 		int dim = va_arg(args, int);
 		shape[i] = dim;
 		tensor->volume *= dim;
 		if(i > 0) tensor->batch_size *= dim;
 	}
-	va_end(args);
 
 	tensor->batches = shape[0];
 	tensor->shape = shape;
+
+	float* data = borrowFloat(tensor->volume);
+	if(!data){
+		tensor->erase(tensor);
+		releaseTensor(tensor);
+		return NULL;
+	}
+	tensor->data = data;
+
+	float* grad = borrowFloat(tensor->volume);
+	if(!grad){
+		tensor->erase(tensor);
+		releaseTensor(tensor);
+		return NULL;
+	}
+	tensor->grad = grad;
 
 	return tensor;
 }

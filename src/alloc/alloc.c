@@ -12,6 +12,7 @@ MemoryPool_sn* createPool(int size, ItemType type){
 	pool->type = type;
 	pool->pool_size = size;
 	pool->free_size = size;
+	pool->allocated_size = 0;
 
 	pool->item_pool = (void**)calloc(pool->pool_size, sizeof(void*));
 	if(!pool->item_pool){
@@ -46,7 +47,7 @@ void destroyPool(MemoryPool_sn* pool){
 	}
 
 	if(pool->item_pool)
-		for(int i = 0; i < pool->pool_size; i++)
+		for(int i = 0; i < pool->allocated_size; i++)
 			if(pool->freeItem) pool->freeItem(pool->item_pool[i]);
 	
 	free(pool->item_pool);
@@ -60,7 +61,6 @@ void releaseItem(void* item, MemoryPool_sn* pool, prepareItem* prepareItem){
 	}
 
 	if(pool->pool_size == pool->free_size){
-		assert(0);
 		return;
 	}
 

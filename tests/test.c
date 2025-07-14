@@ -16,5 +16,4 @@ void cleanUp(){
 int main(){
 	Tensor_sn* t = borrowTensor(2, 3, 3);
 	printTensor(t);
-	(void)t;
 }
