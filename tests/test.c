@@ -15,5 +15,9 @@ void cleanUp(){
 
 int main(){
 	Tensor_sn* t = borrowTensor(2, 3, 3);
+	Tensor_sn* t1 = borrowTensor(3, 1, 2, 4);
+	Creator_sn* c = borrowCreator();
+	(void)c;
 	printTensor(t);
+	printTensor(t1);
 }
