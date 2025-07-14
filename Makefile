@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -Iinclude -lm
+CFLAGS = -Wall -Wextra -Werror -Iinclude -lm -std=c23
 DFLAGS = -g -O0 -fsanitize=address -U_FORTIFY_SOURCE
 AR = ar
 ARFLAGS = rcs
@@ -11,8 +11,8 @@ BUILD_DIR = build
 LIB_NAME = smolnet
 STATIC_LIB = $(BUILD_DIR)/lib$(LIB_NAME).a
 
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
-OBJ_FILES = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_FILES))
+SRC_FILES = $(shell find $(SRC_DIR) -name "*.c")
+OBJ_FILES = $(patsubst %.c, $(BUILD_DIR)/%.o, $(subst $(SRC_DIR)/,,$(SRC_FILES)))
 
 BUILD_TYPE ?= release
 
@@ -33,10 +33,11 @@ debug:
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(STATIC_LIB): $(OBJ_FILES)
+$(STATIC_LIB): $(OBJ_FILES) | $(BUILD_DIR)
 	$(AR) $(ARFLAGS) $@ $^
 
 test: all

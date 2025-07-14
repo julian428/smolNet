@@ -1,13 +1,20 @@
 #include <smolnet.h>
+#include <stdio.h>
+
+__attribute__((destructor))
+void cleanUp(){
+	MemoryPool_sn* creatorPool = getCreatorPool();
+	MemoryPool_sn* tensorPool = getTensorPool();
+	MemoryPool_sn* floatPool = getFloatPool();
+	MemoryPool_sn* intPool = getIntPool();
+	creatorPool->free(creatorPool);
+	tensorPool->free(tensorPool);
+	floatPool->free(floatPool);
+	intPool->free(intPool);
+}
 
 int main(){
-	Tensor* a = tensor_random((int[]){1, 2}, 2);
-	Tensor* b = tensor_random((int[]){1, 2}, 2);
-
-	Tensor* c = add_tensors(a, b);
-	print_tensor(c);
-
-	free_tensor(c);
-	free_tensor(b);
-	free_tensor(a);
+	Tensor_sn* t = borrowTensor(2, 3, 3);
+	printTensor(t);
+	(void)t;
 }
