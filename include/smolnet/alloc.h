@@ -5,8 +5,11 @@
 #include <stdlib.h>
 
 #include "tensor.h"
+#include "layer.h"
 #include "creator.h"
 
+constexpr int MP_NETWORK_INITIAL_SIZE = 4;
+constexpr int MP_LAYER_INITIAL_SIZE = 16;
 constexpr int MP_TENSOR_INITIAL_SIZE = 64;
 constexpr int MP_CREATOR_INITIAL_SIZE = 64;
 constexpr int MP_INTEGER_INITIAL_SIZE = 64;
@@ -78,6 +81,12 @@ void releaseTensor(Tensor_sn* tensor);
 Tensor_sn* borrowTensor(int dims, ...);
 
 // layer
+MemoryPool_sn* getLayerPool();
+
+destroyItem destroyLayer;
+void releaseLayer(Layer_sn* layer);
+Layer_sn* borrowLayer();
+
 // network
 
 #endif
