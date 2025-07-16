@@ -25,13 +25,13 @@ void releaseLayer(Layer_sn* layer){
 	releaseItem(layer, pool, prepareLayer);
 }
 
-Layer_sn* borrowLayer(){
+Layer_sn* borrowLayer(int batch_count, int input_size, int output_size){
 	MemoryPool_sn* pool = getLayerPool();
 	void** item = borrowItem(pool);
 	if(!item) return NULL;
 
 	if(*item == NULL){
-		*item = (void*)createLayer();
+		*item = (void*)createDenseLayer(batch_count, input_size, output_size);
 		pool->item_pool[pool->allocated_size++] = *item;
 	}
 

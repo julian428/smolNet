@@ -38,7 +38,9 @@ void eraseLayer(Layer_sn* layer){
 	}
 
 	releaseTensor(layer->output);
-	free(layer->context);
+
+	layer->free = freeLayer;
+	layer->erase = eraseLayer;
 
 	layer->type = L_NONE;
 	layer->param_count = 0;

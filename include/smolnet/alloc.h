@@ -85,7 +85,7 @@ MemoryPool_sn* getLayerPool();
 
 destroyItem destroyLayer;
 void releaseLayer(Layer_sn* layer);
-Layer_sn* borrowLayer();
+Layer_sn* borrowLayer(int batch_count, int input_size, int output_size);
 
 // network
 
