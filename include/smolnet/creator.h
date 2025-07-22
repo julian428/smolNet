@@ -27,10 +27,11 @@ Creator_sn* createCreator(Tensor_sn* mom, Tensor_sn* dad, CreatorType type);
 void printCreator(Creator_sn* creator);
 
 // basic
-int broadcast_shape(Tensor_sn* a, Tensor_sn* b, int* output_shape);
-int get_broadcast_index(int idx, int original_dim);
+int* broadcastShape(Tensor_sn* a, Tensor_sn* b, int* dims);
+int getBroadcastIndex(int idx, int original_dim);
+Tensor_sn* broadcastedTensor(Tensor_sn* a, Tensor_sn* b);
 
-Tensor_sn* add_tensors(Tensor_sn* a, Tensor_sn* b);
-Tensor_sn* mul_tensors(Tensor_sn* a, Tensor_sn* b);
+Tensor_sn* addTensors(Tensor_sn* a, Tensor_sn* b);
+Tensor_sn* mulTensors(Tensor_sn* a, Tensor_sn* b);
 
 #endif

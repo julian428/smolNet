@@ -28,7 +28,7 @@ int main(){
 		t1->data[i] = (float)rand() / INT_MAX;
 	}
 
-	Tensor_sn* t2 = add_tensors(t, t1);
+	Tensor_sn* t2 = addTensors(t, t1);
 	(void)l;
 	printTensor(t);
 	printf("\n");
