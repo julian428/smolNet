@@ -24,8 +24,8 @@ Tensor_sn* createTensor(){
 	return tensor;
 }
 
-Tensor_sn* createShapedTensor(int dims, va_list args){
-	if(dims < 1){
+Tensor_sn* createShapedTensor(int dims, int* shape){
+	if(!shape || dims < 1){
 		assert(0);
 		return NULL;
 	}
@@ -33,22 +33,13 @@ Tensor_sn* createShapedTensor(int dims, va_list args){
 	Tensor_sn* tensor = createTensor();
 	if(!tensor) return NULL;
 
-	int* shape = borrowInt(dims);
-	if(!shape){
-		releaseTensor(tensor);
-		tensor->erase(tensor);
-		return NULL;
-	}
-
 	tensor->dims = dims;
 	tensor->batch_size = 1;
 	tensor->volume = 1;
 	
 	for(int i = 0; i < dims; i++){
-		int dim = va_arg(args, int);
-		shape[i] = dim;
-		tensor->volume *= dim;
-		if(i > 0) tensor->batch_size *= dim;
+		tensor->volume *= shape[i];
+		if(i > 0) tensor->batch_size *= shape[i];
 	}
 
 	tensor->batches = shape[0];
@@ -109,8 +100,16 @@ void eraseTensor(Tensor_sn* tensor){
 void printTensor(Tensor_sn* tensor){
 	if(!tensor) return;
 	
+	printf("%p, ", tensor);
 	for(int i = 0; i < tensor->dims - 1; i++){
 		printf("%dx", tensor->shape[i]);
 	}
 	printf("%d\n", tensor->shape[tensor->dims - 1]);
+
+	for(int i =0; i < tensor->batches; i++){
+		for(int j = 0; j < tensor->batch_size; j++){
+			printf("%8.5f", tensor->data[tensor->batch_size * i + j]);
+		}
+		printf("\n");
+	}
 }

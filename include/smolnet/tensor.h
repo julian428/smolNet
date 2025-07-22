@@ -3,7 +3,6 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <stdio.h>
 
 typedef struct Tensor Tensor_sn;
@@ -31,7 +30,7 @@ typedef struct Tensor {
 } Tensor_sn;
 
 Tensor_sn* createTensor();
-Tensor_sn* createShapedTensor(int dims, va_list args);
+Tensor_sn* createShapedTensor(int dims, int* shape);
 
 tensorReleaseFunction freeTensor;
 tensorReleaseFunction eraseTensor;

@@ -25,17 +25,15 @@ void releaseTensor(Tensor_sn* tensor){
 	releaseItem(tensor, pool, prepareTensor);
 }
 
-Tensor_sn* borrowTensor(int dims, ...){
+Tensor_sn* borrowTensor(int dims, int* shape){
 	MemoryPool_sn* pool = getTensorPool();
 	void** item = borrowItem(pool);
 	if(!item) return NULL;
 
-	va_list args;
-	va_start(args, dims);
 	if(*item == NULL){
-		*item = (void*)createShapedTensor(dims, args);
+		*item = (void*)createShapedTensor(dims, shape);
 		pool->item_pool[pool->allocated_size++] = *item;
 	}
-	va_end(args);
+
 	return (Tensor_sn*)(*item);
 }

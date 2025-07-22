@@ -21,7 +21,12 @@ Layer_sn* createDenseLayer(int batch_count, int input_size, int output_size){
 	layer->getParameter = getDenseParameter;
 	layer->forward = forwardDense;
 
-	layer->output = borrowTensor(2, batch_count, output_size);
+	int output_dims = 2;
+	int* output_shape = borrowInt(output_dims);
+	output_shape[0] = batch_count;
+	output_shape[1] = output_size;
+
+	layer->output = borrowTensor(output_dims, output_shape);
 	if(!layer->output){
 		freeDenseLayer(layer);
 		assert(0);
@@ -90,21 +95,34 @@ DenseContext_sn* createDenseContext(int batch_count, int input_size, int output_
 		return NULL;
 	}
 	
-	ctx->weights = borrowTensor(2, input_size, output_size);
+	int weights_dims = 2;
+	int* weights_shape = borrowInt(weights_dims);
+	weights_shape[0] = input_size;
+	weights_shape[1] = output_size;
+
+	ctx->weights = borrowTensor(weights_dims, weights_shape);
 	if(!ctx->weights){
 		freeDenseContext(ctx);
 		assert(0);
 		return NULL;
 	}
 
-	ctx->bias = borrowTensor(1, output_size);
+	int bias_dims = 1;
+	int* bias_shape = borrowInt(bias_dims);
+	bias_shape[0] = output_size;
+
+	ctx->bias = borrowTensor(bias_dims, bias_shape);
 	if(!ctx->bias){
 		freeDenseContext(ctx);
 		assert(0);
 		return NULL;
 	}
 
-	ctx->wx = borrowTensor(1, batch_count, output_size);
+	int wx_dims = 2;
+	int* wx_shape = borrowInt(wx_dims);
+	wx_shape[0] = batch_count;
+	wx_shape[1] = output_size;
+	ctx->wx = borrowTensor(wx_dims, wx_shape);
 	if(!ctx->wx){
 		freeDenseContext(ctx);
 		assert(0);

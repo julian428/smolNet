@@ -9,11 +9,11 @@
 #include "creator.h"
 
 constexpr int MP_NETWORK_INITIAL_SIZE = 4;
-constexpr int MP_LAYER_INITIAL_SIZE = 16;
-constexpr int MP_TENSOR_INITIAL_SIZE = 64;
+constexpr int MP_LAYER_INITIAL_SIZE 	= 16;
+constexpr int MP_TENSOR_INITIAL_SIZE 	= 64;
 constexpr int MP_CREATOR_INITIAL_SIZE = 64;
 constexpr int MP_INTEGER_INITIAL_SIZE = 64;
-constexpr int MP_FLOAT_INITIAL_SIZE = 256;
+constexpr int MP_FLOAT_INITIAL_SIZE 	= 256;
 
 typedef void (destroyItem)(void*);
 typedef void (prepareItem)(void*);
@@ -46,6 +46,7 @@ typedef struct MemoryPool {
 } MemoryPool_sn;
 
 MemoryPool_sn* createPool(int size, ItemType type);
+void cleanUp();
 
 void destroyPool(MemoryPool_sn* pool);
 void releaseItem(void* item, MemoryPool_sn* pool, prepareItem* prepareItem);
@@ -71,14 +72,14 @@ MemoryPool_sn* getCreatorPool();
 
 destroyItem destroyCreator;
 void releaseCreator(Creator_sn* creator);
-Creator_sn* borrowCreator();
+Creator_sn* borrowCreator(Tensor_sn* mom, Tensor_sn* dad, CreatorType type);
 
 // tensor
 MemoryPool_sn* getTensorPool();
 
 destroyItem destroyTensor;
 void releaseTensor(Tensor_sn* tensor);
-Tensor_sn* borrowTensor(int dims, ...);
+Tensor_sn* borrowTensor(int dims, int* shape);
 
 // layer
 MemoryPool_sn* getLayerPool();

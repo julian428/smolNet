@@ -83,3 +83,17 @@ void** borrowItem(MemoryPool_sn* pool){
 	pool->free_size--;
 	return &(node->item);
 }
+
+__attribute__((destructor))
+void cleanUp(){
+	MemoryPool_sn* layerPool = getLayerPool();
+	MemoryPool_sn* tensorPool = getTensorPool();
+	MemoryPool_sn* creatorPool = getCreatorPool();
+	MemoryPool_sn* floatPool = getFloatPool();
+	MemoryPool_sn* intPool = getIntPool();
+	layerPool->free(layerPool);
+	tensorPool->free(tensorPool);
+	creatorPool->free(creatorPool);
+	floatPool->free(floatPool);
+	intPool->free(intPool);
+}
