@@ -14,7 +14,6 @@ void prepareCreator(void* item){
 	creator->dad = NULL;
 	creator->mom = NULL;
 	creator->back = NULL;
-	creator->type = OP_NONE;
 }
 
 
@@ -27,13 +26,13 @@ void releaseCreator(Creator_sn* creator){
 	releaseItem(creator, pool, prepareCreator);
 }
 
-Creator_sn* borrowCreator(Tensor_sn* mom, Tensor_sn* dad, CreatorType type){
+Creator_sn* borrowCreator(Tensor_sn* mom, Tensor_sn* dad, operationFunction* revFunc){
 	MemoryPool_sn* pool = getCreatorPool();
 	void** item = borrowItem(pool);
 	if(!item) return NULL;
 
 	if(*item == NULL){
-		*item = (void*)createCreator(mom, dad, type);
+		*item = (void*)createCreator(mom, dad, revFunc);
 		pool->item_pool[pool->allocated_size++] = *item;
 	}
 	return (Creator_sn*)(*item);

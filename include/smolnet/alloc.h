@@ -72,7 +72,7 @@ MemoryPool_sn* getCreatorPool();
 
 destroyItem destroyCreator;
 void releaseCreator(Creator_sn* creator);
-Creator_sn* borrowCreator(Tensor_sn* mom, Tensor_sn* dad, CreatorType type);
+Creator_sn* borrowCreator(Tensor_sn* mom, Tensor_sn* dad, operationFunction* revFunc);
 
 // tensor
 MemoryPool_sn* getTensorPool();
@@ -86,7 +86,7 @@ MemoryPool_sn* getLayerPool();
 
 destroyItem destroyLayer;
 void releaseLayer(Layer_sn* layer);
-Layer_sn* borrowLayer(int batch_count, int input_size, int output_size);
+Layer_sn* borrowLayer(int input_size, int output_size);
 
 // network
 

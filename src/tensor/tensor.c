@@ -108,7 +108,7 @@ void printTensor(Tensor_sn* tensor){
 
 	for(int i =0; i < tensor->batches; i++){
 		for(int j = 0; j < tensor->batch_size; j++){
-			printf("%8.5f", tensor->data[tensor->batch_size * i + j]);
+			printf("%+9.5f", tensor->data[tensor->batch_size * i + j]);
 		}
 		printf("\n");
 	}

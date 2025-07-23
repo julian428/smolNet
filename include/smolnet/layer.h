@@ -22,7 +22,7 @@ typedef struct Layer {
 	propagationFunction* forward;
 	layerReleaseFunction* free;
 	layerReleaseFunction* erase;
-	Tensor_sn* (*getParameter)(Layer_sn*, int index);
+	Tensor_sn** (*getParameterRef)(Layer_sn*, int index);
 
 	LayerType type;
 	int param_count;
@@ -40,14 +40,14 @@ typedef struct DenseContext {
 	Tensor_sn* wx;
 } DenseContext_sn;
 
-Layer_sn* createDenseLayer(int batch_count, int input_size, int output_size);
+Layer_sn* createDenseLayer(int input_size, int output_size);
 propagationFunction forwardDense;
 
 layerReleaseFunction freeDenseLayer;
 layerReleaseFunction eraseDenseLayer;
 
-DenseContext_sn* createDenseContext(int batch_count, int input_size, int output_size);
+DenseContext_sn* createDenseContext(int input_size, int output_size);
 void freeDenseContext(DenseContext_sn* ctx);
-Tensor_sn* getDenseParameter(Layer_sn* layer, int index);
+Tensor_sn** getDenseParameterRef(Layer_sn* layer, int index);
 
 #endif

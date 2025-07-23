@@ -13,7 +13,7 @@ Layer_sn* createLayer(){
 	layer->type = L_NONE;
 	layer->param_count = 0;
 
-	layer->getParameter = NULL;
+	layer->getParameterRef = NULL;
 	layer->forward = NULL;
 	layer->context = NULL;
 	layer->output = NULL;
@@ -45,7 +45,7 @@ void eraseLayer(Layer_sn* layer){
 	layer->type = L_NONE;
 	layer->param_count = 0;
 
-	layer->getParameter = NULL;
+	layer->getParameterRef = NULL;
 	layer->forward = NULL;
 	layer->context = NULL;
 	layer->output = NULL;

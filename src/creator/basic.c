@@ -38,19 +38,21 @@ Tensor_sn* broadcastedTensor(Tensor_sn* a, Tensor_sn* b){
 	return result;
 }
 
-Tensor_sn* addTensors(Tensor_sn* a, Tensor_sn* b){
-	if(!a || !b) return NULL;
+void computeStride(int main_index, int secondary_index, int* stride_ref, int* index_ref){
+	if(!stride_ref || !index_ref) return;
+	*index_ref += getBroadcastIndex(main_index, secondary_index) * (*stride_ref);
+	*stride_ref *= secondary_index;
+}
+
+Tensor_sn* tensorsOperation(
+	Tensor_sn* a, Tensor_sn* b, operationFunction* opFunc
+){
+	if(!a || !b || !opFunc) return NULL;
 
 	Tensor_sn* result = broadcastedTensor(a, b);
 	if(!result) return NULL;
 
-	result->creator = borrowCreator(a, b, OP_ADD);
-	if(!result->creator){
-		releaseTensor(result);
-		return NULL;
-	}
-
-	int* indecies = borrowInt(result->dims);
+	int indecies[result->dims];
 	for(int i = 0; i < result->volume; i++){
 		int div = 1;
 
@@ -59,25 +61,22 @@ Tensor_sn* addTensors(Tensor_sn* a, Tensor_sn* b){
 			div *= result->shape[d];
 		}
 
-		int a_idx = 0, b_idx = 0;
-		int a_stride = 1, b_stride = 1;
+		int idx[2] = {0};
+		int stride[2] = {1};
 
-		for(int d = a->dims - 1, rd = result->dims - 1; d > -1; d--, rd--){
-			int i_a = getBroadcastIndex(indecies[rd], a->shape[d]);
-			a_idx += i_a * a_stride;
-			a_stride *= a->shape[d];
+		int a_dim_offset = result->dims - a->dims;
+		int b_dim_offset = result->dims - b->dims;
+
+		for(int d = result->dims - 1; d > -1; d--){
+			int da = d - a_dim_offset;
+			int db = d - b_dim_offset;
+
+			if(da > -1) computeStride(indecies[d], a->shape[da], &stride[0], &idx[0]);
+			if(db > -1) computeStride(indecies[d], b->shape[db], &stride[1], &idx[1]);
 		}
 
-		for(int d = b->dims - 1, rd = result->dims - 1; d > -1; d--, rd--){
-			int i_b = getBroadcastIndex(indecies[rd], b->shape[d]);
-			b_idx += i_b * b_stride;
-			b_stride *= b->shape[d];
-		}
-
-		result->data[i] = a->data[a_idx] + b->data[b_idx];
+		opFunc(a, b, result, idx[0], idx[1], i);
 	}
-
-	releaseInt(indecies);
 	
 	return result;
 }

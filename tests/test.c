@@ -3,38 +3,38 @@
 #include <time.h>
 #include <limits.h>
 
-
-
 int main(){
-	Layer_sn* l = borrowLayer(1, 3, 3);
-
-	int t_dims = 2;
-	int* t_shape = borrowInt(t_dims);
-	t_shape[0] = 3;
-	t_shape[1] = 3;
-	int t1_dims = 3;
-	int* t1_shape = borrowInt(t1_dims);
-	t1_shape[0] = 2;
-	t1_shape[1] = 1;
-	t1_shape[2] = 3;
-
 	srand(time(NULL));
-	Tensor_sn* t = borrowTensor(t_dims, t_shape);
-	for(int i = 0; i < t->volume; i++){
-		t->data[i] = (float)rand() / INT_MAX;
-	}
-	Tensor_sn* t1 = borrowTensor(t1_dims, t1_shape);
-	for(int i = 0; i < t1->volume; i++){
-		t1->data[i] = (float)rand() / INT_MAX;
+	Layer_sn* l = borrowLayer(3, 3);
+
+	Tensor_sn* weights = *l->getParameterRef(l, 0);
+	for(int i = 0; i < weights->volume; i++){
+		weights->data[i] = ((float)rand() / INT_MAX) * 2 - 1;
 	}
 
-	Tensor_sn* t2 = addTensors(t, t1);
-	(void)l;
-	printTensor(t);
+	Tensor_sn* bias = *l->getParameterRef(l, 1);
+	for(int i = 0; i < bias->volume; i++){
+		bias->data[i] = ((float)rand() / INT_MAX) * 2 - 1;
+	}
+
+	int input_dims = 2;
+	int* input_shape = borrowInt(input_dims);
+	input_shape[0] = 3;
+	input_shape[1] = 3;
+
+	Tensor_sn* input = borrowTensor(input_dims, input_shape);
+	for(int i = 0; i < input->volume; i++){
+		input->data[i] = ((float)rand() / INT_MAX) * 2 - 1;
+	}
+
+	l->forward(l, input);
+	printTensor(input);
 	printf("\n");
-	printTensor(t1);
+	printTensor(weights);
 	printf("\n");
-	printTensor(t2);
+	printTensor(bias);
 	printf("\n");
-	printCreator(t2->creator);
+	printTensor(*l->getParameterRef(l, 2));
+	printf("\n");
+	printTensor(l->output);
 }

@@ -1,7 +1,7 @@
 #include <smolnet/layer.h>
 
-Layer_sn* createDenseLayer(int batch_count, int input_size, int output_size){
-	if(batch_count < 1 || input_size < 1 || output_size < 1){
+Layer_sn* createDenseLayer(int input_size, int output_size){
+	if(input_size < 1 || output_size < 1){
 		assert(0);
 		return NULL;
 	}
@@ -18,22 +18,12 @@ Layer_sn* createDenseLayer(int batch_count, int input_size, int output_size){
 	layer->type = L_DENSE;
 	layer->param_count = 3;
 
-	layer->getParameter = getDenseParameter;
+	layer->getParameterRef = getDenseParameterRef;
 	layer->forward = forwardDense;
 
-	int output_dims = 2;
-	int* output_shape = borrowInt(output_dims);
-	output_shape[0] = batch_count;
-	output_shape[1] = output_size;
+	layer->output = NULL;
 
-	layer->output = borrowTensor(output_dims, output_shape);
-	if(!layer->output){
-		freeDenseLayer(layer);
-		assert(0);
-		return NULL;
-	}
-
-	layer->context = (void*)createDenseContext(batch_count, input_size, output_size);
+	layer->context = (void*)createDenseContext(input_size, output_size);
 	if(!layer->context){
 		freeDenseLayer(layer);
 		assert(0);
@@ -46,8 +36,15 @@ Layer_sn* createDenseLayer(int batch_count, int input_size, int output_size){
 void forwardDense(Layer_sn* layer, Tensor_sn* input){
 	if(!layer || layer->type != L_DENSE) return;
 
-	(void)layer; (void)input;
-	assert(0 && "Not yet implemented.");
+	Tensor_sn* weights = *layer->getParameterRef(layer, 0);
+	Tensor_sn* bias = *layer->getParameterRef(layer, 1);
+	Tensor_sn** wxRef = layer->getParameterRef(layer, 2);
+	
+	if(*wxRef) releaseTensor(*wxRef);
+	if(layer->output) releaseTensor(layer->output);
+
+	*wxRef = tensorsOperation(weights, input, mul);
+	layer->output = tensorsOperation(*wxRef, bias, add);
 }
 
 void freeDenseLayer(Layer_sn* layer){
@@ -64,7 +61,7 @@ void eraseDenseLayer(Layer_sn* layer){
 	eraseLayer(layer);
 }
 
-Tensor_sn* getDenseParameter(Layer_sn* layer, int index){
+Tensor_sn** getDenseParameterRef(Layer_sn* layer, int index){
 	if(!layer || layer->type != L_DENSE) return NULL;
 
 	int prepared_index = index % layer->param_count;
@@ -73,18 +70,18 @@ Tensor_sn* getDenseParameter(Layer_sn* layer, int index){
 
 	switch(prepared_index){
 		case 0:
-			return ctx->weights;
+			return &ctx->weights;
 		case 1:
-			return ctx->bias;
+			return &ctx->bias;
 		case 2:
-			return ctx->wx;
+			return &ctx->wx;
 	}
 
 	return NULL;
 }
 
-DenseContext_sn* createDenseContext(int batch_count, int input_size, int output_size){
-	if(batch_count < 1 || input_size < 1 || output_size < 1){
+DenseContext_sn* createDenseContext(int input_size, int output_size){
+	if(input_size < 1 || output_size < 1){
 		assert(0);
 		return NULL;
 	}
@@ -118,16 +115,7 @@ DenseContext_sn* createDenseContext(int batch_count, int input_size, int output_
 		return NULL;
 	}
 
-	int wx_dims = 2;
-	int* wx_shape = borrowInt(wx_dims);
-	wx_shape[0] = batch_count;
-	wx_shape[1] = output_size;
-	ctx->wx = borrowTensor(wx_dims, wx_shape);
-	if(!ctx->wx){
-		freeDenseContext(ctx);
-		assert(0);
-		return NULL;
-	}
+	ctx->wx = NULL;
 
 	return ctx;
 }
